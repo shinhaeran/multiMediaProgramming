@@ -154,11 +154,32 @@ void ConnectedComponentLabeling(_TP** seg, int height, int width, int** label, i
 	}
 }
 
+void drawLine(int **image, int height, int width, int x1, int x2, int y1, int y2) {
+	// y = m(x-x1)+y1 , m= x2-x1 /y2- y1
+	float m = float(x2 - x1) / (y2 - y1);
 
-
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			if (y == int(m*(x - x1) + (y1)))
+				image[y][x] = 0;
+		}
+	}
+}
+//768 1024
 void main() {
 	int height, width;
 	int** image = ReadImage("Koala.jpg", &height, &width);
+
+	/*for (int y = 0; y < 50; y++) {
+		for (int x = 0; x < 50; x++)
+			image[y][x] = 255;
+	}*/
+
+	
+	drawLine(image, height, width, 0,768 , 0, 1024);
+
+
+
 
 	ImageShow("test1", image, height, width);
 }
