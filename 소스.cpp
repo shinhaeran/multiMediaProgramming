@@ -154,32 +154,110 @@ void ConnectedComponentLabeling(_TP** seg, int height, int width, int** label, i
 	}
 }
 
-void drawLine(int **image, int height, int width, int x1, int x2, int y1, int y2) {
-	// y = m(x-x1)+y1 , m= x2-x1 /y2- y1
-	float m = float(x2 - x1) / (y2 - y1);
+void drawLine(int **image, int height, int width,double a, double b, double Thickness){
 
 	for (int y = 0; y < height; y++) {
 		for (int x = 0; x < width; x++) {
-			if (y == int(m*(x - x1) + (y1)))
-				image[y][x] = 0;
+		
+			double d = fabs(a*x - y + b) / sqrt(a*a + 1.0);
+
+			if (d < Thickness) image[y][x] = 255;
+		}
+	}
+}
+
+void drawCircle(int **image, int height, int width, double a, double b, double Thickness) {
+
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			double a1 = x - a;
+			double b1 = y - b;
+			double d = sqrt(a1*a1 + b1 *b1);
+
+			if (d < Thickness) image[y][x] = 255;
 		}
 	}
 }
 //768 1024
-void main() {
+void class_031() {
 	int height, width;
 	int** image = ReadImage("Koala.jpg", &height, &width);
+	/*박스
+	for (int y = 0; y < 500; y++) {
+		for (int x = 0; x < 100; x++) {
+			image[100+y][x + 200] = 255;*/
 
-	/*for (int y = 0; y < 50; y++) {
-		for (int x = 0; x < 50; x++)
-			image[y][x] = 255;
-	}*/
 
-	
-	drawLine(image, height, width, 0,768 , 0, 1024);
+			/*image[y][x] : y=[0,767] x=[0,1023]
+			for (int x = 0; x < width; x++) {
+				int y = (int)(0.4*x + 100+0.5); //0.4는 플롯 int라서 짤림
+				if (y > height - 1) continue;
+				else {
+					image[y][x] = 255;
+				}
+			}
+			//선 두껍게하고싶으면 y를 아래위로 하나씩 더*/
 
+			//근의공식
+			//y = ax + b --> ax - y + b = 0 --> d = (ax0-y0+b)/sqrt(a*a+1)
+
+
+			/*입력으로 줘야할것 : a,b,thickness, image, width, height
+			double a = 3.0;
+			double b = 50.0;
+			double Thickness = 3.0;
+
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					double d = fabs(a*x - y + b) / sqrt(a*a + 1.0);
+
+					if (d < Thickness) image[y][x] = 255;
+				}
+			}
+			원래함수*/
+
+
+	double a = 50.0;
+	double b = 50.0;
+	double Thickness = 3;
+
+	drawLine(image, height, width, a, b, Thickness);
+	drawCircle(image, height, width, a, b, Thickness);
+
+
+	//원의 방정식 (x-a)^2+(y-b)^2=r^2
+	//r=sqrt((x-a)^2+(y-b)^2)
 
 
 
 	ImageShow("test1", image, height, width);
+}
+
+void Affine_Transform(int** image, int** img_out, int height, int width, float a, float b, float c, float d) {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+
+			int X = a*x + b*y;
+			int Y = c*x + d*y;
+			if(X<1024 && Y<768)
+				img_out[Y][X] = image[y][x];
+		}
+	}
+	ImageShow("test1", img_out, height, width);
+}
+
+//Affine Transform 
+int main() {
+
+	int height, width;
+	int** image = ReadImage("Koala.jpg", &height, &width);
+
+	float a, b, c, d;
+	a = 2; b = 0; c = 0; d = 2;
+
+	int ** Affine_image = IntAlloc2(height, width);
+
+	Affine_Transform(image, Affine_image, height, width, a, b, c, d);
+
+
 }
