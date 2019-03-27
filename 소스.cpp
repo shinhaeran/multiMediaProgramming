@@ -316,7 +316,22 @@ void class0320() {
 
 	//ImageShow("1", image, height, width);
 }
+float** FloatAlloc2(int height, int width)
+{
+	float** tmp;
+	tmp = (float**)calloc(height, sizeof(float*));
+	for (int i = 0; i<height; i++)
+		tmp[i] = (float*)calloc(width, sizeof(float));
+	return(tmp);
+}
 
+void FloatFree2(float** image, int height, int width)
+{
+	for (int i = 0; i<height; i++)
+		free(image[i]);
+
+	free(image);
+}
 typedef struct POS3D{
 	float x;
 	float y;
@@ -329,16 +344,25 @@ void init_POS3D(POS3D* P, float x, float y, float z) {
 	P->z = z;
 }
 
+float eval_len_POS3D(POS3D P1, POS3D P2) {
+	float len = 0;
 
-void drawLine_pinhole(int** image, int** image_out, int height, int width, POS3D Px0, POS3D Px1 ) {
+	len = pow(P1.x - P2.x, 2) + pow(P1.y - P2.y, 2) + pow(P1.y - P2.y, 2);
+	len = sqrt(len);
+
+	return len;
+}
+
+
+void drawLine_pinhole(int** image, int** image_out, int height, int width, POS3D Px0, POS3D Px1, float f1, float f2 ) {
 	float X, Y, Z;
-	float x, y, z;
-	float f1 = 200; float f2 = 300;
+	float x, y;
+	
 	float px = width / 2; float py = height / 2; float w = 0;
-
+	float len = eval_len_POS3D(Px0, Px1);
 	//l = p+t(q-p) 200,300
 
-	for (float t = 0.1; t < 100; t =t+0.1) {
+	for (float t = 0.1; t < len; t =t+ len/10000) {
 		X = Px0.x + t*(Px1.x - Px0.x);
 		Y = Px0.y + t*(Px1.y - Px0.y);
 		Z = Px0.z + t*(Px1.z - Px0.z);
@@ -346,9 +370,8 @@ void drawLine_pinhole(int** image, int** image_out, int height, int width, POS3D
 		x = f1*X + px*Z;
 		y = f2*Y + py*Z;
 		w = Z;
-		
-		image_out[int((y / w) + 0.5)][int((x / w) + 0.5)] = 255;
-		printf("%f %f %f \n", x/w,y/w,w);
+		if ((x/w)< (double)width && (x / w) >= 0.0 && (y / w)< (double)height && (y / w) >= 0.0)
+		 image_out[int((y / w))][int((x / w))] = 255;
 	}
 
 	ImageShow("aa", image_out, height, width);
@@ -365,15 +388,17 @@ int main() {
 	int height, width;
 
 	int** image = ReadImage("Koala.jpg", &height, &width);
-	int** image_out = IntAlloc2(height, width);
+	int** image_out1 = IntAlloc2(height, width);
+	int** image_out2 = IntAlloc2(height, width);
 
-	ImageShow("qq", image, height, width);
+	//ImageShow("qq", image, height, width);
 
 	POS3D Px0, Px1;
 
 	init_POS3D(&Px0, 1, 2, 3);
-	init_POS3D(&Px1, 5, 6, 7);
+	init_POS3D(&Px1, 2, 3, 1);
 
-	drawLine_pinhole(image, image_out, height, width, Px0,Px1);
+	drawLine_pinhole(image, image_out1, height, width, Px0,Px1, 200, 300);
+	
 	
 }
